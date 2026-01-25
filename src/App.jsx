@@ -7,6 +7,7 @@ import { jsPDF } from 'jspdf';
 const INITIAL_STATE = {
   productName: '',
   totalWeight: 100,
+  referenceWeight: 100,
   unit: 'g',
   data: {
     calories: { value: '', mode: '5kcal_unit' },
@@ -86,7 +87,10 @@ function App() {
       nut, 
       parseFloat(state.data[nut].value) || 0, 
       state.totalWeight, 
-      { displayMode: state.data[nut].mode }
+      { 
+        displayMode: state.data[nut].mode,
+        referenceWeight: state.referenceWeight 
+      }
     );
     return acc;
   }, {});
@@ -117,11 +121,21 @@ function App() {
               type="number" 
               value={state.totalWeight}
               onChange={e => handleInputChange('totalWeight', parseFloat(e.target.value) || 0)}
+              placeholder="100"
+            />
+          </div>
+          <div className="field">
+            <label>영양성분 기준 함량 (g)</label>
+            <input 
+              type="number" 
+              value={state.referenceWeight}
+              onChange={e => handleInputChange('referenceWeight', parseFloat(e.target.value) || 0)}
+              placeholder="100"
             />
           </div>
         </div>
 
-        <div className="section-title"><RefreshCcw size={18} /> 영양 성분 (100g 당 실험값 입력)</div>
+        <div className="section-title"><RefreshCcw size={18} /> 영양 성분 ({state.referenceWeight}g 당 실험값 입력)</div>
         <div className="input-group">
           {Object.keys(state.data).map(nut => (
             <div className="field" key={nut}>

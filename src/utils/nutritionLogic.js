@@ -24,9 +24,10 @@ const roundToUnit = (value, unit) => {
   return Math.round(value / unit) * unit;
 };
 
-export const calculateNutrient = (type, value100g, totalWeight, options = {}) => {
+export const calculateNutrient = (type, inputValue, totalWeight, options = {}) => {
+  const referenceWeight = options.referenceWeight || 100;
   // 1. Calculate base value for total weight
-  const baseValue = (value100g * totalWeight) / 100;
+  const baseValue = (inputValue * totalWeight) / referenceWeight;
   let displayValue = "";
   let percentage = 0;
   let finalValueForPct = baseValue;
