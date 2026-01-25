@@ -105,6 +105,54 @@ body {
   font-size: 0.85rem;
   font-weight: 500;
   color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.tooltip-container {
+  position: relative;
+  display: inline-flex;
+  cursor: help;
+  color: var(--text-secondary);
+}
+
+.tooltip-text {
+  visibility: hidden;
+  width: 240px;
+  background-color: #333;
+  color: #fff;
+  text-align: left;
+  border-radius: 6px;
+  padding: 8px 12px;
+  position: absolute;
+  z-index: 100;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.4;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  pointer-events: none;
+}
+
+.tooltip-container:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+.tooltip-text::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-left: -5px;
+  border-width: 5px;
+  border-style: solid;
+  border-color: #333 transparent transparent transparent;
 }
 
 input[type="text"],

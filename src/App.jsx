@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { calculateNutrient, DAILY_VALUES } from './utils/nutritionLogic';
-import { Download, Printer, Save, RefreshCcw, FileText } from 'lucide-react';
+import { Download, Printer, Save, RefreshCcw, FileText, Info } from 'lucide-react';
 import { toPng, toJpeg } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
@@ -95,6 +95,24 @@ function App() {
     return acc;
   }, {});
 
+  const isOptionDisabled = (nut, value, optionValue) => {
+    if (!value && value !== 0) return false;
+    const baseValue = (parseFloat(value) * state.totalWeight) / state.referenceWeight;
+
+    switch (optionValue) {
+      case '5kcal_zero': return baseValue >= 5;
+      case 'less_than_1': return baseValue >= 1;
+      case 'zero_under_05': return baseValue >= 0.5;
+      case 'less_than_05': return baseValue >= 0.5;
+      case 'zero_under_02': return baseValue >= 0.2;
+      case 'less_than_5': return baseValue >= 5;
+      case 'zero_under_2': return baseValue >= 2;
+      case 'zero_under_5': return baseValue >= 5;
+      case 'unit_1': return baseValue < 1 && nut !== 'calories'; // Generally meaningful if >= 1
+      default: return false;
+    }
+  };
+
   return (
     <div className="app-container">
       {/* Left Panel: Inputs */}
@@ -139,7 +157,10 @@ function App() {
         <div className="input-group">
           {Object.keys(state.data).map(nut => (
             <div className="field" key={nut}>
-              <label>{getNutrientLabel(nut)}</label>
+              <label>
+                {getNutrientLabel(nut)}
+                <Tooltip text={getNutrientTooltip(nut)} />
+              </label>
               <input 
                 type="number" 
                 placeholder="0" 
@@ -151,7 +172,13 @@ function App() {
                 onChange={e => handleNutrientChange(nut, 'mode', e.target.value)}
               >
                 {getOptionsForNutrient(nut).map(opt => (
-                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                  <option 
+                    key={opt.value} 
+                    value={opt.value} 
+                    disabled={isOptionDisabled(nut, state.data[nut].value, opt.value)}
+                  >
+                    {opt.label}
+                  </option>
                 ))}
               </select>
             </div>
@@ -203,6 +230,15 @@ function App() {
   );
 }
 
+function Tooltip({ text }) {
+  return (
+    <div className="tooltip-container">
+      <Info size={14} />
+      <span className="tooltip-text">{text}</span>
+    </div>
+  );
+}
+
 function NutrientRow({ label, value, percentage, sub = false, isNormal = false }) {
   return (
     <div className={`nutrient-row ${sub ? 'sub' : ''}`}>
@@ -227,48 +263,65 @@ function getNutrientLabel(nut) {
   return labels[nut] || nut;
 }
 
+function getNutrientTooltip(nut) {
+  switch (nut) {
+    case 'calories': return "열량은 정수(1kcal 단위) 또는 5kcal 단위로 표시하며, 5kcal 미만인 경우 0kcal로 표시할 수 있습니다.";
+    case 'carbs': return "탄수화물은 1g 단위로 표시하며, 1g 미만은 '1g 미만'으로, 0.5g 미만은 '0'으로 표시할 수 있습니다.";
+    case 'sugars': return "당류는 1g 단위로 표시하며, 1g 미만은 '1g 미만'으로, 0.5g 미만은 '0'으로 표시할 수 있습니다.";
+    case 'protein': return "단백질은 1g 단위로 표시하며, 1g 미만은 '1g 미만'으로, 0.5g 미만은 '0'으로 표시할 수 있습니다.";
+    case 'fat': return "지방은 5g 초과 시 1g 단위로, 5g 이하 시 0.1g 단위로 표시하며, 0.5g 미만은 '0'으로 표시할 수 있습니다.";
+    case 'saturatedFat': return "포화지방은 5g 초과 시 1g 단위로, 5g 이하 시 0.1g 단위로 표시하며, 0.5g 미만은 '0'으로 표시할 수 있습니다.";
+    case 'transFat': return "트랜스지방은 0.5g 미만은 '0.5g 미만'으로, 0.2g 미만은 '0'으로 표시합니다. 식용유지는 100g당 2g 미만 시 '0' 표시가 가능합니다.";
+    case 'cholesterol': return "콜레스테롤은 5mg 단위로 표시하며, 5mg 미만은 '5mg 미만'으로, 2mg 미만은 '0'으로 표시할 수 있습니다.";
+    case 'sodium': return "나트륨은 120mg 이하 시 5mg 단위로, 120mg 초과 시 10mg 단위로 표시하며, 5mg 미만은 '0'으로 표시할 수 있습니다.";
+    default: return "";
+  }
+}
+
 function getOptionsForNutrient(nut) {
   switch (nut) {
     case 'calories':
       return [
-        { label: '5kcal 단위', value: '5kcal_unit' },
-        { label: '5kcal 미만 "0"', value: '5kcal_zero' },
-        { label: '그대로', value: 'raw' },
+        { label: '그대로 표시', value: 'raw' },
+        { label: '5kcal 단위 표시', value: '5kcal_unit' },
+        { label: '5kcal 미만 "0" 표시', value: '5kcal_zero' },
       ];
     case 'carbs':
     case 'sugars':
     case 'protein':
       return [
-        { label: '1g 단위', value: 'unit_1' },
+        { label: '그대로 표시', value: 'raw' },
+        { label: '1g 단위 표시', value: 'unit_1' },
         { label: '1g 미만 표시', value: 'less_than_1' },
-        { label: '0.5g 미만 "0"', value: 'zero_under_05' },
-        { label: '그대로', value: 'raw' },
+        { label: '0.5g 미만 "0" 표시', value: 'zero_under_05' },
       ];
     case 'fat':
     case 'saturatedFat':
       return [
+        { label: '그대로 표시', value: 'raw' },
         { label: '표본 단위 (자동)', value: 'unit_auto' },
-        { label: '0.5g 미만 "0"', value: 'zero_under_05' },
-        { label: '그대로', value: 'raw' },
+        { label: '0.5g 미만 "0" 표시', value: 'zero_under_05' },
       ];
     case 'transFat':
       return [
-        { label: '0.5g 미만 표시', value: 'less_than_05' },
-        { label: '0.2g 미만 "0"', value: 'zero_under_02' },
-        { label: '그대로', value: 'raw' },
+        { label: '그대로 표시', value: 'raw' },
+        { label: '표본 단위 (자동)', value: 'unit_auto' },
+        { label: '0.5g 미만 "0.5g 미만"', value: 'less_than_05' },
+        { label: '0.2g 미만 "0" 표시', value: 'zero_under_02' },
+        { label: '식용유지(100g당 2g미만) "0"', value: 'zero_under_02' }, // For simplicity, using same zero logic
       ];
     case 'cholesterol':
       return [
-        { label: '5mg 단위', value: 'unit_5' },
+        { label: '그대로 표시', value: 'raw' },
+        { label: '5mg 단위 표시', value: 'unit_5' },
         { label: '5mg 미만 표시', value: 'less_than_5' },
-        { label: '2mg 미만 "0"', value: 'zero_under_2' },
-        { label: '그대로', value: 'raw' },
+        { label: '2mg 미만 "0" 표시', value: 'zero_under_2' },
       ];
     case 'sodium':
       return [
-        { label: '5/10mg 단위', value: 'unit_5_10' },
-        { label: '5mg 미만 "0"', value: 'zero_under_5' },
-        { label: '그대로', value: 'raw' },
+        { label: '그대로 표시', value: 'raw' },
+        { label: '5/10mg 단위 표시', value: 'unit_5_10' },
+        { label: '5mg 미만 "0" 표시', value: 'zero_under_5' },
       ];
     default:
       return [{ label: '기본', value: 'raw' }];
