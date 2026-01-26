@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { calculateNutrient, DAILY_VALUES } from './utils/nutritionLogic';
-import { Download, Printer, Save, RefreshCcw, FileText, Info } from 'lucide-react';
+import { Download, Printer, Save as SaveIcon, RefreshCcw, FileText, Info, Trash2, List } from 'lucide-react';
 import { toPng, toJpeg } from 'html-to-image';
 import { jsPDF } from 'jspdf';
 
@@ -28,11 +28,20 @@ function App() {
     return saved ? JSON.parse(saved) : INITIAL_STATE;
   });
 
+  const [savedItems, setSavedItems] = useState(() => {
+    const saved = localStorage.getItem('nutrition_saved_items');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const labelRef = useRef(null);
 
   useEffect(() => {
     localStorage.setItem('nutrition_data', JSON.stringify(state));
   }, [state]);
+
+  useEffect(() => {
+    localStorage.setItem('nutrition_saved_items', JSON.stringify(savedItems));
+  }, [savedItems]);
 
   const handleInputChange = (field, value) => {
     setState(prev => ({ ...prev, [field]: value }));
@@ -51,6 +60,34 @@ function App() {
   const resetData = () => {
     if (confirm('모든 데이터를 초기화하겠습니까?')) {
       setState(INITIAL_STATE);
+    }
+  };
+
+  const handleSave = () => {
+    if (!state.productName) {
+      alert('제품명을 입력해주세요.');
+      return;
+    }
+    const newItem = {
+      ...state,
+      id: Date.now(),
+      savedAt: new Date().toLocaleString(),
+    };
+    setSavedItems(prev => [newItem, ...prev]);
+    alert('목록에 저장되었습니다.');
+  };
+
+  const handleLoad = (item) => {
+    if (confirm(`'${item.productName}' 데이터를 불러오시겠습니까? 현재 작성 중인 내용은 사라집니다.`)) {
+      // Exclude id and savedAt from the state to avoid issues
+      const { id, savedAt, ...itemState } = item;
+      setState(itemState);
+    }
+  };
+
+  const handleDelete = (id) => {
+    if (confirm('이 항목을 삭제하시겠습니까?')) {
+      setSavedItems(prev => prev.filter(item => item.id !== id));
     }
   };
 
@@ -185,9 +222,33 @@ function App() {
           ))}
         </div>
 
-        <button className="btn btn-secondary" onClick={resetData} style={{ marginTop: '1rem' }}>
-          초기화
-        </button>
+        <div className="action-row" style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
+          <button className="btn btn-primary" onClick={handleSave} style={{ flex: 1 }}>
+            <SaveIcon size={18} /> 목록에 저장
+          </button>
+          <button className="btn btn-secondary" onClick={resetData} style={{ flex: 1 }}>
+            <RefreshCcw size={18} /> 초기화
+          </button>
+        </div>
+
+        {savedItems.length > 0 && (
+          <div className="saved-list-section">
+            <div className="section-title"><List size={18} /> 저장된 목록</div>
+            <div className="saved-items">
+              {savedItems.map(item => (
+                <div key={item.id} className="saved-item">
+                  <div className="saved-item-info" onClick={() => handleLoad(item)}>
+                    <div className="saved-item-name">{item.productName}</div>
+                    <div className="saved-item-date">{item.savedAt}</div>
+                  </div>
+                  <button className="delete-btn" onClick={() => handleDelete(item.id)}>
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Right Panel: Preview */}
