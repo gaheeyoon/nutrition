@@ -1,17 +1,53 @@
-# 영양정보표 생성기 (Nutrition Label Generator)
-배포 트리거를 위해 수정됨
+# 🥗 가히의 영양정보표 생성기 (Nutrition Label Generator)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+자영업자 및 식품 판매자를 위한 전문적인 영양정보표 생성 도구입니다. 복잡한 식약처 표시 규정을 자동으로 계산하여 세련된 디자인의 영양정보표를 만들어줍니다.
 
-Currently, two official plugins are available:
+## ✨ 주요 기능
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **자동 계산 엔진**: 입력한 수치를 바탕으로 열량, 나트륨 등 9대 영양성분을 식약처 기준에 맞춰 자동 반올림 및 계산합니다.
+- **유연한 기준 설정**: 실험값이 100g 기준이 아니더라도(예: 30g, 50g 등) 자유롭게 기준량을 설정하여 입력할 수 있습니다.
+- **스마트 가이드**: 각 항목별 표시 규칙에 어긋나는 옵션은 자동으로 비활성화되어 실수를 방지합니다.
+- **다중 저장 기능**: 작업 중인 내용을 목록으로 저장하고 언제든 다시 불러올 수 있습니다. (데이터는 브라우저에 안전하게 보관됩니다.)
+- **고화질 내보내기**: 완성된 표를 PNG 이미지나 PDF 파일로 즉시 다운로드할 수 있습니다.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📖 사용 방법 (비개발자용)
 
-## Expanding the ESLint configuration
+### 1. 기본 정보 입력
+- **제품명**: 생성할 표의 파일명이 됩니다. (예: 찹쌀 김부각)
+- **총 내용량**: 제품의 전체 무게를 입력합니다.
+- **영양성분 기준 함량**: 실험성적서에 적힌 기준 중량(보통 100g이나 때에 따라 다름)을 입력합니다.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 2. 영양 성분 데이터 입력
+- 각 항목 옆의 **정보(ℹ️) 아이콘**에 마우스를 올리면 정확한 표시 규칙을 확인할 수 있습니다.
+- 수치(실험값)를 입력한 후, 우측 드롭다운 메뉴에서 표시 방법(단위 표시 등)을 선택합니다.
+- *Tip: 입력한 값에 따라 선택할 수 없는 옵션은 자동으로 회색으로 변합니다.*
+
+### 3. 목록 저장 및 관리
+- **[목록에 저장]** 버튼을 누르면 화면 하단 '저장된 목록'에 추가됩니다.
+- 나중에 제품 정보를 수정해야 할 때 목록에서 클릭하여 바로 불러올 수 있습니다.
+- **[초기화]** 버튼은 현재 작성 중인 모든 내용을 비웁니다.
+
+### 4. 이미지/PDF 저장
+- 우측에 보이는 미리보기 화면이 실제 저장될 모습입니다.
+- **[이미지 저장]**을 누르면 고화질 PNG 파일로, **[PDF 다운로드]**를 누르면 인쇄용 문서로 저장됩니다.
+
+---
+
+## 🛠 실행 및 배포 (개발자용)
+
+본 프로젝트는 Vite + React를 사용하여 구축되었습니다.
+
+### 로컬 실행
+```bash
+npm install
+npm run dev
+```
+
+### 배포
+GitHub Actions를 통한 자동 배포가 설정되어 있습니다. `master` 브랜치에 푸시하면 자동으로 아래 주소에 반영됩니다.
+- 배포 주소: [https://gaheeyoon.github.io/nutrition/](https://gaheeyoon.github.io/nutrition/)
+
+---
+**문의 사항**: 기능 제안이나 오류 제보는 언제든 환영합니다!
