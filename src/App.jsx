@@ -222,33 +222,11 @@ function App() {
           ))}
         </div>
 
-        <div className="action-row" style={{ marginTop: '1.5rem', display: 'flex', gap: '1rem' }}>
-          <button className="btn btn-primary" onClick={handleSave} style={{ flex: 1 }}>
-            <SaveIcon size={18} /> 목록에 저장
-          </button>
-          <button className="btn btn-secondary" onClick={resetData} style={{ flex: 1 }}>
-            <RefreshCcw size={18} /> 초기화
+        <div style={{ marginTop: '1.5rem' }}>
+          <button className="btn btn-secondary" onClick={resetData} style={{ width: '100%' }}>
+            <RefreshCcw size={18} /> 데이터 초기화
           </button>
         </div>
-
-        {savedItems.length > 0 && (
-          <div className="saved-list-section">
-            <div className="section-title"><List size={18} /> 저장된 목록</div>
-            <div className="saved-items">
-              {savedItems.map(item => (
-                <div key={item.id} className="saved-item">
-                  <div className="saved-item-info" onClick={() => handleLoad(item)}>
-                    <div className="saved-item-name">{item.productName}</div>
-                    <div className="saved-item-date">{item.savedAt}</div>
-                  </div>
-                  <button className="delete-btn" onClick={() => handleDelete(item.id)}>
-                    <Trash2 size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Right Panel: Preview */}
@@ -286,6 +264,29 @@ function App() {
             <Printer size={18} /> PDF 다운로드
           </button>
         </div>
+
+        <button className="btn btn-primary" onClick={handleSave} style={{ width: '100%', maxWidth: '400px', backgroundColor: '#2563eb' }}>
+          <SaveIcon size={18} /> 목록에 저장
+        </button>
+
+        {savedItems.length > 0 && (
+          <div className="saved-list-section" style={{ width: '100%', maxWidth: '400px', marginTop: '0.5rem' }}>
+            <div className="section-title"><List size={18} /> 저장된 목록</div>
+            <div className="saved-items">
+              {savedItems.map(item => (
+                <div key={item.id} className="saved-item">
+                  <div className="saved-item-info" onClick={() => handleLoad(item)}>
+                    <div className="saved-item-name">{item.productName}</div>
+                    <div className="saved-item-date">{item.savedAt}</div>
+                  </div>
+                  <button className="delete-btn" onClick={() => handleDelete(item.id)}>
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
